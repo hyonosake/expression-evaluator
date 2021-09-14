@@ -14,7 +14,19 @@ char	*rl_gets(char *line)
 	return (line);
 }
 
-int64_t		ft_atoi(char const *str)
+
+int8_t		whatType(char sym)
+{
+	if (sym == PLUS || sym == MINUS || sym == MULTI
+			|| sym == DIVIDE || sym == OPEN_BRACK || sym == CLOSE_BRACK)
+		return (sym);
+	else if (isdigit(sym))	
+		return (NUM);
+	else
+		return (-1);
+}
+
+int64_t		_atoi(char const *str)
 {
 	int			i;
 	uint64_t	result;

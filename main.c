@@ -3,7 +3,6 @@
 
 void	print_prompt()
 {
-	printf("Enter a valid string (numbers, '+', '-', '*', '/') separated by spaces\n");
 	printf("Print");
 	printf(RED);
 	printf(" EXIT ");
@@ -36,8 +35,7 @@ int main(void)
 		print_prompt();
 		input = rl_gets(input);
 		args = split(input, ' ');
-		while (args[i])
-			parse_tokens(&root, &curr, args[i++]);
+		parse_tokens(args);
 		free_2d_array(args);
 		printf("Postorder traversal calculation\n");
 		calculate_value(root);

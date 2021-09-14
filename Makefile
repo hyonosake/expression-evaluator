@@ -1,46 +1,38 @@
-NAME =	evaluator
-SRCS =	main.c \
-		utils.c \
-		split.c \
-		tree_ops.c \
-		2d_arrays.c
-OBJS = $(SRCS:.c=.o)
+NAME		=	fp_init
+CC			=	gcc
 
-SRC_D = $(SRCS:.c=.d)
+WFLAGS		= 	-Wall -Werror -Wextra
 
-USR = $(shell whoami)
-CC =	gcc
+FLAGS		=	$(WFLAGS) -g
 
-LRD_INC =	-I/Users/$(USR)/.brew/opt/readline/include
-LLRD_INC =	-I/usr/local/Cellar/readline/8.1/include
-LRD_LIB =	-lreadline -L/Users/$(USR)/.brew/opt/readline/lib
-LLRD_LIB =	-lreadline -L/usr/local/Cellar/readline/8.1/lib
+SRCS_DIR	=	.
+INC_DIR		=	.
+SRCS_LIST	=	main.c split.c tree_ops.c utils.c 2d_arrays.c
+SRCS		=	$(addprefix $(SRCS_DIR)/, $(SRCS_LIST))
+HEADERS		=	$(notdir $(*.h))
+OBJS_DIR	=	./build
+OBJS		=	$(SRCS:%.c=$(OBJS_DIR)/%.o)
+DEPS		=	$(SRCS:%.c=$(OBJS_DIR)/%.d)
 
-FLAGS = -g -MMD \
-		-Wall -Wextra -Werror \
-		-O2 \
-		#-fsanitize=address
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.c Makefile
+	@mkdir -p $(@D)
+	$(CC) $(FLAGS) -MMD -c $< -o $@ -I $(HEADERS)
 
-.c.o:
-			$(CC)  $(FLAGS) -c -I nodes.h  $(LRD_INC) $< -o ${<:.c=.o} 
+all: $(NAME)
 
-$(NAME):	$(OBJS)
-			$(CC)  $(FLAGS) $(OBJS) -o $(NAME) $(LRD_LIB)
-	@echo	"Binary created"
+$(NAME): $(OBJS)
+	$(CC) $(FLAGS) $(OBJS) -o $(NAME) -I $(HEADERS)
 
-all:		$(NAME)
-
-c:			all clean
 clean:
-			rm -f $(OBJS)
-			rm -f $(SRC_D)
-	@echo "Object files were deleted"
+	rm -rf $(OBJS)
+	rm -rf $(DEPS)
+	rm -rf $(OBJS_DIR)
 
-fclean:		clean
-			rm -f $(NAME)
-	@echo "Everithing was deleted"
+fclean: clean
+	rm -rf $(NAME)
 
-re:			fclean all
+re: fclean all
 
--include $(SRC_D)
-#.SILENT:
+.PHONY: all clean fclean re
+
+-include $(DEPS)

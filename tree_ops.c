@@ -1,79 +1,48 @@
 #include "evaluator.h"
 
-t_node	*new_node(char type, void *value)
-{
-	t_node *new;
 
-	new = (t_node *)malloc(sizeof(t_node));
-	new->type = type;
-	new->value = value;
-	new->left = NULL;
-	new->right = NULL;
+void		perror_exit(const char *msg, int exit_status)	{
+	perror(msg);
+	exit(exit_status);
+}
+t_node		*create_token(char *token)
+{
+	t_node *new = calloc(1, sizeof(t_node));
+	new->type = whatType(*token);
+	if (new->type == -1 || !*token)
+		perror_exit("Unknown token to parse.\n", *token);
 	return (new);
 }
 
-int		*num_add(char *str)
-{
-	int	*new;
-
-	new = (int *)malloc(sizeof(int));
-	*new = ft_atoi(str);
-	return (new);
-}
-
-void	parse_tokens(t_node **root_node, t_node **curr, char *node_value)
+void		parse_tokens(char **args)
 {
 	t_node	*token;
-	int		*num;
-	if (IS_OPERAND(node_value[0]))
-	{
-		if (!(*root_node)->type)
-				(*root_node)->type = *node_value;
-		else if (!((*root_node)->right))
-		{
-			printf("Trying to make 2 operations in a row. Not gonna work tho\n");
-			exit(1);
-		}
-		else if (*node_value == '-' || *node_value == '+')
-		{
-			printf("Node is %c. Rebuilding a tree\n", *node_value);
-			token = new_node(*node_value, NULL);
-			token->left = *root_node;
-			*root_node = token;
-			*curr = *root_node;
-		}
-		else if (*node_value == '*' || *node_value == '/')
-		{
-			printf("Node is %c. Getting further down the tree\n", *node_value);
-			token = new_node(*node_value, NULL);
-			token->left = (*root_node)->right;
-			(*root_node)->right = token;
-			*curr = token;
-		}
-	}
-	else if (_ISDIGIT(*node_value))
-	{
-		token = new_node(NUM, (void *)node_value);
-		num = num_add((char *)node_value);
-		if (!((*curr)->left))
-			(*curr)->left = new_node(NUM, num);
-		else if (!((*curr)->right))
-			(*curr)->right = new_node(NUM, num);
+	static t_node	*root;
+	static t_node	*curr_branch;
+	t_node			*curr_cmd;
+	int				i = 0;
+
+	while (args[i])
+		curr_cmd = create_token(args[i]);
+	if (curr_cmd->type == NUM)	{
+		if (!curr_branch->left)
+			curr_branch->left = curr_cmd;
+		else if (!curr_branch->right)
+			curr_branch->right = curr_cmd;
 		else
-		{
-			printf("Trying to insert 2 operands without an operation\
-					between'em. Not gonna work tho\n");
-			exit(1);
-		}
-	}
-	else
-	{
-		printf("What is '%c' token? It's not allowed here!\n", *node_value);
-		exit(1);
+			perror_exit("Making 2 operands in a row.\n", 127);
 	}
 }
 
-int		void_multi(void *a, void *b)
+void		fill_in_tree(t_node **head, t_node **curr_branch, t_node *cmd)
+{
+	if (!*head)
+	{
+		*head
+	}
+}
+
+double		void_multi(void *a, void *b)
 {
 	char *a_str = (char *)a;
 	char *b_str = (char *)b;
@@ -81,7 +50,7 @@ int		void_multi(void *a, void *b)
 	return (atoi(a_str) * atoi(b_str));
 }
 
-int		void_divide(void *a, void *b)
+double		void_divide(void *a, void *b)
 {
 	char *a_str = (char *)a;
 	char *b_str = (char *)b;
@@ -89,14 +58,14 @@ int		void_divide(void *a, void *b)
 	return (atoi(a_str) / atoi(b_str));
 }
 
-int		void_plus(void *a, void *b)
+double		void_plus(void *a, void *b)
 {
 	char *a_str = (char *)a;
 	char *b_str = (char *)b;
 
 	return (atoi(a_str) + atoi(b_str));
 }
-int 	void_minus(void *a, void *b)
+double 	void_minus(void *a, void *b)
 {
 	char *a_str = (char *)a;
 	char *b_str = (char *)b;
@@ -114,25 +83,24 @@ void	calculate_value(t_node *root)
 		return ;
 	if (root->type == MULTI)
 	{
-		root->value = malloc(sizeof(int));
-		*((int *)(root->value)) = *((int *)root->left->value) * *((int *)root->right->value);
+		root->value = malloc(sizeof(double));
+		*((double *)(root->value)) = *((double *)root->left->value) * *((double *)root->right->value);
 	}
 	else if (root->type == DIVIDE)
 	{
-		root->value = malloc(sizeof(int));
-		*((int *)root->value) = *((int *)root->left->value) / *((int *)root->right->value);
+		root->value = malloc(sizeof(double));
+		*((double *)root->value) = *((double *)root->left->value) / *((double *)root->right->value);
 	}
 	else if (root->type == PLUS)
 	{
-		root->value = malloc(sizeof(int));
-		*((int *)root->value) = *((int *)root->left->value) + *((int *)root->right->value);
+		root->value = malloc(sizeof(double));
+		*((double *)root->value) = *((double *)root->left->value) + *((double *)root->right->value);
 	}
 	else if (root->type == MINUS)
 	{
-		root->value = malloc(sizeof(int));
-		*((int *)root->value) = *((int *)root->left->value) - *((int *)root->right->value);
+		root->value = malloc(sizeof(double));
+		*((double *)root->value) = *((double *)root->left->value) - *((double *)root->right->value);
 	}
-	if (root->type == PLUS)
 	// no free here.
 	root->left = NULL;
 	root->right = NULL;
